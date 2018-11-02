@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>get json</title>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="css/jquery-ui.css">
+<style>
+
+* { margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<div id="area" style="width: 800px; height: 600px; position: relative;">
+	<div id="cut" style="width: 100px; height: 100px; background-color: rgba(255, 0, 0, .3); border: solid 1px red; position: absolute; left: 0; top: 0;"></div>
+	<canvas id="myCanvas" width="800" height="600"></canvas>
+</div>
+
+<div class="container" style="margin-top: 50px; text-align: right;">
+	<button class="btn btn-primary btn-cut">CUT</button>
+	<button class="btn btn-success btn-download">DOWNLOAD</button>
+	<!-- <div class="jumbotron">
+		<h1>Korea Cities</h1>
+	</div>
+
+	<div id="citylist"></div> -->
+</div>
+
+<script src="js/jquery.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script>
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+var img = new Image();
+img.onload = function (e){
+	ctx.beginPath();
+	ctx.drawImage(img, 0, 0, 800, 600);
+	ctx.closePath();
+};
+img.src = "wheein.jpg";
+
+var startX = 0;
+var startY = 0;
+var endX = 0;
+var endY = 0;
+
+$(function (){
+	$("#cut").draggable({
+		containment: "#area"
+	});
+	$("#cut").resizable({
+		containment: "#area"
+	});
+
+	$(".btn-cut").on("click", function (e){
+		var primary = $("#cut");
+		var start = primary.offset();
+		startX = start.left - 254;
+		startY = start.top;
+
+		var width = primary.width();
+		var height = primary.height();
+		endX = width;
+		endY = height;
+
+
+		var img = new Image();
+		img.onload = function (){
+			var x = (c.width / 2) - endX / 2;
+			var y = (c.height / 2) - endY / 2;
+
+			ctx.clearRect(0, 0, c.width, c.height);
+			ctx.beginPath();
+			ctx.drawImage(img, startX, startY, endX, endY, x, y, endX, endY);
+			ctx.closePath();
+		};
+		img.src = c.toDataURL();
+	});
+
+	$(".btn-download").on("click", function (e){
+		// 초기화
+		$(".download").remove();
+
+		var data = c.toDataURL();
+
+		var a = document.createElement("a");
+		a.href = data;
+		a.download = "";
+		a.setAttribute("class", "download");
+		document.body.appendChild(a);
+
+		a.click();
+	});
+
+	// 그림 그리기
+	var paint = false;
+	c.addEventListener("mousedown", function (){ paint = true; }, false);
+	c.addEventListener("mouseup", function (){ paint = false; }, false);
+	c.addEventListener("mousemove", function (e){
+		var x = e.offsetX;
+		var y = e.offsetY;
+		if (paint){
+			ctx.beginPath();
+			ctx.arc(x, y, 5, 0, Math.PI * 2, true);
+			ctx.fill();
+			ctx.closePath();
+		};
+	}, false);
+});
+
+
+// $.getJSON("getjson.php", function (data){
+// 	$.each(data, function (i, self){
+// 		var id = self.cityid;
+// 		var name_ko = self.name_ko;
+// 		var name_en = self.name_en;
+// 		var name_full = self.name_full;
+// 		var area = self.area;
+// 		var population = self.population;
+// 		var info = self.info;
+
+// 		var html = "<div class='area'>";
+// 		html += "<div>";
+// 		html += "<h1>" + id + ") " + name_ko + "<button type='button' class='btn btn-remove btn-danger' style='float: right;'>Delete</button><button type='button' class='btn btn-down btn-success' style='float: right; margin-right: 5px;' data-control='1'>Read More</button></h1>";
+// 		html += "<div width='100' height='100'>";
+// 		html += "<div style='display: none; background-color: #f5f5f5; padding: 9px 12px; box-sizing: border-box;' class='slide'>";
+// 		html += "<div class='svgArea'></div>";
+// 		html += "<h2>" + name_en + "</h2>";
+// 		html += "<h3>" + name_full + "</h3>";
+// 		html += "<p>" + area + "</p>";
+// 		html += "<p>" + population + "</p>";
+// 		html += "<p>" + info + "</p>";
+// 		html += "</div>";
+// 		html += "</div><hr>";
+
+// 		$("#citylist").append(html);
+// 	});
+// });
+
+// $("#citylist").on("click", ".btn-remove", function (e){
+// 	if (confirm("정말로 삭제하시겠습니까?")){
+// 		$(this).closest("div").remove();
+// 	};
+// });
+
+// $("#citylist").on("click", ".btn-down", function (e){
+// 	var control = $(this).data("control");
+
+// 	if (control){
+// 		$(this).data("control", 0);
+
+// 		$(this).closest(".area").find(".slide").slideDown(function (){
+// 			$(this).closest(".area").find(".btn-down").text("Fold");
+// 		});
+// 		return;
+// 	};
+
+// 	$(this).closest(".area").find(".slide").slideUp(function (){
+// 		$(this).closest(".area").find(".btn-down").text("Read More");
+// 	});
+
+// 	$(this).data("control", 1);
+// });
+</script>
+
+</body>
+</html>
